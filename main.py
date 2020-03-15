@@ -38,6 +38,7 @@ class Dots_and_Boxes():
         self.board_status = np.zeros(shape=(number_of_dots - 1, number_of_dots - 1))
         self.row_status = np.zeros(shape=(number_of_dots, number_of_dots - 1))
         self.col_status = np.zeros(shape=(number_of_dots - 1, number_of_dots))
+        
         # Input from user in form of clicks
         self.player1_starts = not self.player1_starts
         self.player1_turn = not self.player1_starts
@@ -45,7 +46,6 @@ class Dots_and_Boxes():
         self.turntext_handle = []
 
         self.already_marked_boxes = []
-
         self.display_turn_text()
 
     def mainloop(self):
@@ -73,21 +73,35 @@ class Dots_and_Boxes():
         position = (grid_position-distance_between_dots/4)//(distance_between_dots/2)
 
         type = False
-        logical_position=[]
+        logical_position = []
         if position[1] % 2 == 0 and (position[0] - 1) % 2 == 0:
             r = int((position[0]-1)//2)
             c = int(position[1]//2)
             logical_position = [r, c]
-            type='row'
+            type = 'row'
             # self.row_status[c][r]=1
         elif position[0] % 2 == 0 and (position[1] - 1) % 2 == 0:
             c = int((position[1] - 1) // 2)
             r = int(position[0] // 2)
             logical_position = [r, c]
             type = 'col'
-            # self.col_status[c][r]=1
 
         return logical_position, type
+
+    def mark_box(self):
+        boxes = np.argwhere(self.board_status == -4)
+        for box in boxes:
+            if list(box) not in self.already_marked_boxes and list(box) !=[]:
+                self.already_marked_boxes.append(list(box))
+                color = player1_color_light
+                self.shade_box(box, color)
+
+        boxes = np.argwhere(self.board_status == 4)
+        for box in boxes:
+            if list(box) not in self.already_marked_boxes and list(box) !=[]:
+                self.already_marked_boxes.append(list(box))
+                color = player2_color_light
+                self.shade_box(box, color)
 
     def update_board(self, type, logical_position):
         r = logical_position[0]
@@ -113,7 +127,7 @@ class Dots_and_Boxes():
         return (self.row_status == 1).all() and (self.col_status == 1).all()
 
     # ------------------------------------------------------------------
-    # Graphical Functions:
+    # Drawing Functions:
     # The modules required to draw required game based object on canvas
     # ------------------------------------------------------------------
 
@@ -200,20 +214,6 @@ class Dots_and_Boxes():
                                                        size_of_board-distance_between_dots/8,
                                                        font="cmr 15 bold", text=text, fill=color)
 
-    def mark_box(self):
-        boxes = np.argwhere(self.board_status == -4)
-        for box in boxes:
-            if list(box) not in self.already_marked_boxes and list(box) !=[]:
-                self.already_marked_boxes.append(list(box))
-                color = player1_color_light
-                self.shade_box(box, color)
-
-        boxes = np.argwhere(self.board_status == 4)
-        for box in boxes:
-            if list(box) not in self.already_marked_boxes and list(box) !=[]:
-                self.already_marked_boxes.append(list(box))
-                color = player2_color_light
-                self.shade_box(box, color)
 
     def shade_box(self, box, color):
         start_x = distance_between_dots / 2 + box[1] * distance_between_dots + edge_width/2
@@ -221,8 +221,6 @@ class Dots_and_Boxes():
         end_x = start_x + distance_between_dots - edge_width
         end_y = start_y + distance_between_dots - edge_width
         self.canvas.create_rectangle(start_x, start_y, end_x, end_y, fill=color, outline='')
-    # ---------------------------------------------------------------------------------------------
-
 
     def display_turn_text(self):
         text = 'Next turn: '
