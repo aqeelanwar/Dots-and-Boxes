@@ -107,22 +107,24 @@ class Dots_and_Boxes():
         r = logical_position[0]
         c = logical_position[1]
         val = 1
+        playerModifier = 1
         if self.player1_turn:
-            val =- 1
+            playerModifier = -1
+            
 
         if c < (number_of_dots-1) and r < (number_of_dots-1):
-            self.board_status[c][r] += val
+            self.board_status[c][r] = (abs(self.board_status[c][r]) + val) * playerModifier
 
         if type == 'row':
             self.row_status[c][r] = 1
             if c >= 1:
-                self.board_status[c-1][r] += val
+                self.board_status[c-1][r] = (abs(self.board_status[c-1][r]) + val) * playerModifier
 
         elif type == 'col':
             self.col_status[c][r] = 1
             if r >= 1:
-                self.board_status[c][r-1] += val
-
+                self.board_status[c][r-1] = (abs(self.board_status[c][r-1]) + val) * playerModifier
+                
     def is_gameover(self):
         return (self.row_status == 1).all() and (self.col_status == 1).all()
 
