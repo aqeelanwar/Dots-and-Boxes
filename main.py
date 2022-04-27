@@ -38,7 +38,8 @@ class Dots_and_Boxes():
         self.board_status = np.zeros(shape=(number_of_dots - 1, number_of_dots - 1))
         self.row_status = np.zeros(shape=(number_of_dots, number_of_dots - 1))
         self.col_status = np.zeros(shape=(number_of_dots - 1, number_of_dots))
-        
+        self.pointsScored = False
+
         # Input from user in form of clicks
         self.player1_starts = not self.player1_starts
         self.player1_turn = not self.player1_starts
@@ -87,7 +88,10 @@ class Dots_and_Boxes():
             type = 'col'
 
         return logical_position, type
-
+    
+    def pointScored(self):
+        self.pointsScored = True
+        
     def mark_box(self):
         boxes = np.argwhere(self.board_status == -4)
         for box in boxes:
@@ -107,22 +111,30 @@ class Dots_and_Boxes():
         r = logical_position[0]
         c = logical_position[1]
         val = 1
+        playerModifier = 1
         if self.player1_turn:
-            val =- 1
+            playerModifier = -1
+            
 
         if c < (number_of_dots-1) and r < (number_of_dots-1):
-            self.board_status[c][r] += val
+            self.board_status[c][r] = (abs(self.board_status[c][r]) + val) * playerModifier
+            if abs(self.board_status[c][r]) == 4:
+                self.pointScored()
 
         if type == 'row':
             self.row_status[c][r] = 1
             if c >= 1:
-                self.board_status[c-1][r] += val
+                self.board_status[c-1][r] = (abs(self.board_status[c-1][r]) + val) * playerModifier
+                if abs(self.board_status[c-1][r]) == 4:
+                    self.pointScored()
 
         elif type == 'col':
             self.col_status[c][r] = 1
             if r >= 1:
-                self.board_status[c][r-1] += val
-
+                self.board_status[c][r-1] = (abs(self.board_status[c][r-1]) + val) * playerModifier
+                if abs(self.board_status[c][r-1]) == 4:
+                    self.pointScored()
+                
     def is_gameover(self):
         return (self.row_status == 1).all() and (self.col_status == 1).all()
 
@@ -245,7 +257,8 @@ class Dots_and_Boxes():
                 self.make_edge(valid_input, logical_positon)
                 self.mark_box()
                 self.refresh_board()
-                self.player1_turn = not self.player1_turn
+                self.player1_turn = (not self.player1_turn) if not self.pointsScored else self.player1_turn
+                self.pointsScored = False
 
                 if self.is_gameover():
                     # self.canvas.delete("all")
